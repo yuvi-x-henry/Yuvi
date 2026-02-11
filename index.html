@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FB Token Panel</title>
+    <style>
+        body { font-family: Arial; max-width: 600px; margin: 50px auto; padding: 20px; }
+        textarea { width: 100%; height: 150px; font-family: monospace; }
+        button { background: #1877f2; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; }
+        .token { background: #f0f8ff; padding: 15px; border-radius: 8px; word-break: break-all; }
+        .success { border-left: 4px solid #4CAF50; }
+        .error { border-left: 4px solid #f44336; }
+    </style>
+</head>
+<body>
+    <h1>🔥 Facebook EAAD6V7 Token Extractor</h1>
+    
+    <p><strong>Step 1:</strong> Facebook.com pe login karo → F12 → Application → Cookies → Copy ALL</p>
+    
+    <textarea id="cookies" placeholder="c_user=xxx; xs=xxx; fr=xxx; sb=xxx; datr=xxx..."></textarea><br><br>
+    
+    <button onclick="extractToken()">🚀 Extract Token</button>
+    
+    <div id="result"></div>
+
+    <script>
+        async function extractToken() {
+            const cookies = document.getElementById('cookies').value;
+            const result = document.getElementById('result');
+            
+            if (!cookies) {
+                result.innerHTML = '<div class="error">Cookies required!</div>';
+                return;
+            }
+            
+            result.innerHTML = '<div>⏳ Extracting...</div>';
+            
+            try {
+                const response = await fetch('/api/extract', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cookies })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    result.innerHTML = `
+                        <div class="token success">
+                            ✅ <strong>Token Found!</strong><br>
+                            <strong>EAAD6V7:</strong> ${data.token}<br>
+                            <button onclick="copyToken('${data.token}')">📋 Copy</button>
+                        </div>
+                    `;
+                } else {
+                    result.innerHTML = `<div class="error">❌ ${data.error}</div>`;
+                }
+            } catch (e) {
+                result.innerHTML = `<div class="error">Error: ${e.message}</div>`;
+            }
+        }
+        
+        function copyToken(token) {
+            navigator.clipboard.writeText(token);
+            alert('Token copied! ✅');
+        }
+    </script>
+</body>
+</html>
